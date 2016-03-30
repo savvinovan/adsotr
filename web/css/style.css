@@ -1,0 +1,86 @@
+* {
+    font-family: 'PT Sans', sans-serif;
+}
+body {
+    background: url('../img/bg.jpg') center center;
+}
+.register-form, .login-choose-form {
+  margin-top: 200px;
+  margin-bottom: 10px;
+  border: 1px solid #555;
+  padding: 20px 10px;
+  -webkit-box-shadow: 10px 10px 5px -8px rgba(0,0,0,0.43);
+  -moz-box-shadow: 10px 10px 5px -8px rgba(0,0,0,0.43);
+  box-shadow: 10px 10px 5px -8px rgba(0,0,0,0.43);
+  background: #FFF;
+}
+table {
+    width: 100%;
+}
+table td {
+    padding: 10px;
+}
+table tr {
+    background: #F5FCFF;
+}
+table tr:nth-child(even) {
+    background: #E0F7FF;
+}
+table tr.active {
+    background: #3391CC;
+    color: #FFF;
+}
+h3 {
+    background: #337ab7;
+    color: #FFF;
+    padding: 16px 20px;
+    margin: 0 0 15px 0;
+}
+.login-choose {
+    list-style: none;
+}
+.info, .success, .warning, .error, .validation {
+border: 1px solid;
+margin: 10px 0px;
+padding:15px 10px 15px 50px;
+background-repeat: no-repeat;
+background-position: 10px center;
+}
+.info {
+color: #00529B;
+background-color: #BDE5F8;
+background-image: url('../img/knob/Knob Info.png');
+}
+.success {
+color: #4F8A10;
+background-color: #DFF2BF;
+background-image:url('success.png');
+}
+.warning {
+color: #9F6000;
+background-color: #FEEFB3;
+background-image: url('warning.png');
+}
+.error {
+color: #D8000C;
+background-color: #FFBABA;
+background-image: url('../img/knob/Knob Cancel.png')
+}
+form {
+    margin-bottom: 10px;
+}
+.cbutton {
+    border: 1px solid #337ab7;
+    font-size: 20px;
+    padding: 10px 20px;
+    display: inline-block;    
+}
+input.logonname {
+    visibility: hidden;
+}
+input.logonname:checked + img + span {
+    background: #bbb;
+}
+input.logonname + img + span, input.logonname + img {
+    cursor: pointer;
+}
