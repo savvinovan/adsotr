@@ -36,7 +36,14 @@ class SiteController extends Controller
           $modData = $corp->extractPersonalData($request->bodyParams);
           $checkResult = $corp->checkStep1($modData);
           if($checkResult['error'] == '0') {
-            $_SESSION['step1_fio'] = $request->getBodyParam('fio');
+            $_SESSION['personalData']['Surname'] = $modData['Surname'];
+            $_SESSION['personalData']['Name'] = $modData['Name'];
+            $_SESSION['personalData']['Patronymic'] = $modData['Patronymic'];
+            $_SESSION['personalData']['DocSerial'] = $modData['DocSerial'];
+            $_SESSION['personalData']['BornDate'] = $modData['BornDate'];
+            $_SESSION['personalData']['DocNo'] = $modData['DocNo'];
+            $_SESSION['personalData']['fio'] = $request->getBodyParam('fio');
+            $_SESSION['isAllowedStep2'] = '1';
             Controller::redirect(Url::toRoute('/site/step2'));
           } else {
             $data['result'] = $checkResult;
@@ -47,28 +54,37 @@ class SiteController extends Controller
     }
 
     public function actionStep2() {
-      $request = Yii::$app->request;
-      $corp = new Corp();
-      $data['logins'] = $corp->getLogins($_SESSION['step1_fio']);
-      if($request->isPost) {
-        $checkResult = $corp->checkStep1($request);
-        if($checkResult['error'] == '0') {
+      if($_SESSION['isAllowedStep2'] == '1') {
+        $request = Yii::$app->request;
+        $reqData = $request->bodyParams;
+        $corp = new Corp();
+        $data['logins'] = $corp->getLogins($_SESSION['personalData']['fio']);
+        if($request->isPost) {
+          $checkResult = $corp->checkStep2($reqData);
+          if($checkResult['error'] == '0') {
+            $_SESSION['personalData']['password'] = $reqData['password'];
+            $_SESSION['personalData']['email'] = $reqData['email'];
+            $_SESSION['personalData']['logonname'] = $reqData['logonname'];
+            $_SESSION['isAllowedStep3'] = '1';
             Controller::redirect(Url::toRoute('/site/step3'));
           } else {
             $data['result'] = $checkResult;
           }
+        }
+        return $this->render('step2', $data);
+      } else {
+        Controller::redirect(Url::toRoute('/site/step1'));
       }
-      return $this->render('step2', $data);
     }
     
     public function actionStep3() {
-        $corp = new Corp();
-        if($_SESSION['isPassedSteps'] == '1') {
+        if($_SESSION['isAllowedStep3'] == '1') {
+          $corp = new Corp();
           $corp->createAdSotrPeopleID();
           $corp->sendMailActivationLink();
           return $this->render('step3');
         } else {
-            Controller::redirect(Url::toRoute('/site/step1'));
+          Controller::redirect(Url::toRoute('/site/step1'));
         }
     }
     

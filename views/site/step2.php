@@ -40,9 +40,16 @@ $this->title = 'Регистрация сотрудников в WiFi';
     <div class="form-group">
       <label for="email" class="col-sm-4 control-label">Адрес почты</label>
       <div class="col-sm-8">
-        <input type="text" class="form-control" id="email" placeholder="Введите адрес вашей личной существующей почты" name="email" />
+        <input type="text" class="form-control" id="email" placeholder="Введите адрес вашей корпоративной почты" name="email" value="<?=$_SESSION['personalData']['email']?>"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-8">
+        <button type="submit" class="btn btn-default">Далее</button>
       </div>
     </div>
   </form>
-  <a href='<?=Url::toRoute('/site/step3')?>' class='cbutton'>Далее</a>
+  <?php if(isset($result['message'])) { ?>
+    <div class="error"><?=$result['message']?></div>
+  <?php } ?>
 </div>
