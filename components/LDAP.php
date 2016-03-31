@@ -31,11 +31,30 @@ class LDAP {
       }
     }
     
-    public function createDisabledUser($name, $password, $login, $surname, $givenname, $initials, $group, $institute, $upnlogin) {
-      $uri = 'http://10.2.8.130:3000/add-aduser?name='.$name.'&password='.$password.'&login='.$login.'&surname='.$surname.'&givenname='.$givenname.'&initials='.$initials.'&group='.$group.'&institute='.$institute.'&upnlogin='.$upnlogin;
+    public function createDisabledUser($data) {
+      $uri = 'http://10.2.8.130:3000/add-aduser';
       $curl = curl_init($uri);
+      $fields = array(
+        'name' => urlencode($data['name']),
+        'password' => urlencode($data['password']),
+        'login' => urlencode($data['login']),
+        'surname' => urlencode($data['surname']),
+        'givenname' => urlencode($data['givenname']),
+        'initials' => urlencode($data['initials']),
+        'group' => urlencode($data['group']),
+        'institute' => urlencode($data['institute']),
+        'upnlogin' => urlencode($data['upnlogin']),
+      );
+      //url-ify the data for the POST
+      foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+      rtrim($fields_string, '&');
+      
+      curl_setopt($curl,CURLOPT_POST, count($fields));
+      curl_setopt($curl,CURLOPT_POSTFIELDS, $fields_string);
+
       curl_exec($curl);
       $curlInfo = curl_getinfo($curl);
+      curl_close($curl);
       if($curlInfo['http_code'] == '200') {
         return false;
       } else {

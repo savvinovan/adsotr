@@ -121,6 +121,11 @@ class Corp {
       $arrDocidentity = explode(' ',trim($data['docserialno']));
       $data['DocSerial'] = $arrDocidentity[0];
       $data['DocNo'] = $arrDocidentity[1];
+      
+      // BornDate
+      
+      $data['BornDate'] = $data['BornDate'];
+      
       return $data;
     }
     
@@ -139,7 +144,7 @@ class Corp {
       } else if(sizeof($arr) > 3) {
         $result['error'] = '1';
         $result['message'] = 'Вы ввели лишние символы в ФИО';
-      } else if(empty($data['borndate'])) {
+      } else if(empty($data['BornDate'])) {
         $result['error'] = '1';
         $result['message'] = 'Вы не ввели дату рождения';
       } else if(empty($data['docserialno'])) {
@@ -191,25 +196,57 @@ class Corp {
     
     /* ///////////////////////////////////// */
     
-    public function addAdSotrPeople($data) {
+    public function createAdSotrPeopleID($data) {
+      $staffID = $this->getStaffID($data);
       $activationString = hash('sha256', time());
-      $sql = 'INSERT INTO AdSotrPeople (StaffID, PrivateEmail, CorpEmail, isActivated, ActivationString) VALUES (StaffID, PrivateEmail, CorpEmail, 0, ActivationString)';
+      $passwordHash = hash('sha256', $salt.$data['password']);
+      $sql = 'INSERT INTO AdSotrPeople (StaffID, CorpEmail, isActivated, ActivationString, Password) VALUES (:StaffID, :CorpEmail, 0, :ActivationString, :Password)';
       $command = $this->connection->createCommand($sql);
-      $command->bindParam(":StaffID", $data['StaffID']);
-      $command->bindParam(":PrivateEmail", $data['PrivateEmail']);
-      $command->bindParam(":CorpEmail", $data['CorpEmail']);
+      $command->bindParam(":StaffID", $staffID);
+      $command->bindParam(":CorpEmail", $data['email']);
+      $command->bindParam(":Password", $passwordHash);
       $command->bindParam(":ActivationString", $activationString);
       $command->execute();
+      // TODO: сделать проверку на успешный результат добавления
+      if(true) {
+        $this->ldap->createDisabledUser($data);
+      }
     }
     
     public function checkStep2($data) {
-      if(empty($data['password'])) {
+      $result['error'] = '0';
+      if (empty($data['logonname'])) {
+        $result['error'] = '1';
+        $result['message'] = 'Вы не выбрали логин';
+      } else if(empty($data['password'])) {
         $result['error'] = '1';
         $result['message'] = 'Вы не ввели пароль';
-      } else if(empty($data['password_retype'])) {
+      } else if(empty($data['passwordrepeat'])) {
         $result['error'] = '1';
-        $result['message'] = 'Вы не ввели ФИО';
+        $result['message'] = 'Вы не ввели повтор пароля';
+      } else if(empty($data['email'])) {
+        $result['error'] = '1';
+        $result['message'] = 'Вы не ввели адрес вашей корпоративной почты (@s-vfu.ru)';
+      } else if($data['passwordrepeat'] != $data['password']) {
+        $result['error'] = '1';
+        $result['message'] = 'Введенные пароли не совпадают';
+      } else if(stristr($data['email'], '@s-vfu.ru') === FALSE) {
+        $result['error'] = '1';
+        $result['message'] = 'Вы ввели некорректный адрес корпоративной почты @s-vfu.ru';
       }
       return $result;
     }
+    
+    private function getStaffID($data) {
+      $sql = 'SELECT StaffID FROM StaffPeople WHERE DocSerial = :DocSerial AND DocNo = :DocNo AND Surname = :Surname AND Name = :Name AND Patronymic = :Patronymic';
+      $command = $this->connection->createCommand($sql);
+      $command->bindParam(":DocSerial", $data['DocSerial']);
+      $command->bindParam(":DocNo", $data['DocNo']);
+      $command->bindParam(":Surname", $data['Surname']);
+      $command->bindParam(":Name", $data['Name']);
+      $command->bindParam(":Patronymic", $data['Patronymic']);
+      $row = $command->queryOne();
+      return $row['StaffID'];
+    }
+    
 }
