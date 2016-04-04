@@ -25,3 +25,5 @@ phpunit.phar
 config/passwords.php
 #gulp and npm
 node_modules/*
+#assets
+web/assets
