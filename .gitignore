@@ -23,3 +23,5 @@ phpunit.phar
 # local phpunit config
 /phpunit.xml
 config/passwords.php
+#gulp and npm
+node_modules/*
