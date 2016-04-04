@@ -32,39 +32,44 @@ class LDAP {
     }
     
     public function createDisabledUser($data) {
-      $uri = 'http://10.2.8.130:3000/add-aduser';
-      $curl = curl_init($uri);
+      $uri = 'http://10.2.8.130:3001/add-aduser';
+      $curl = curl_init($uri);      
       $fields = array(
-        'name' => urlencode($data['name']),
-        'password' => urlencode($data['password']),
-        'login' => urlencode($data['login']),
-        'surname' => urlencode($data['surname']),
-        'givenname' => urlencode($data['givenname']),
-        'initials' => urlencode($data['initials']),
-        'group' => urlencode($data['group']),
-        'institute' => urlencode($data['institute']),
-        'upnlogin' => urlencode($data['upnlogin']),
+        'name' => $data['fio'],
+        'password' => $data['password'],
+        'login' => $data['logonname'],
+        'surname' => $data['Surname'],
+        'givenname' => $data['Name'],
+        'initials' => $data['initials'],
+        'group' => 'ФЭИ-М-СИМ-15',
+        'institute' => 'Финансово-экономический институт',
+        'upnlogin' => $data['logonname'].'@empl.s-vfu.ru',
       );
-      //url-ify the data for the POST
-      foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-      rtrim($fields_string, '&');
       
-      curl_setopt($curl,CURLOPT_POST, count($fields));
-      curl_setopt($curl,CURLOPT_POSTFIELDS, $fields_string);
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+      curl_setopt($curl,CURLOPT_POSTFIELDS, http_build_query($fields));
 
       curl_exec($curl);
       $curlInfo = curl_getinfo($curl);
       curl_close($curl);
       if($curlInfo['http_code'] == '200') {
-        return false;
+        $result['error'] = '0';
+        $result['message'] = 'Создан неактивный пользователь';
       } else {
-        return true;
+        $result['error'] = '1';
+        $result['message'] = 'Произошла ошибка';
       }
     }
     
     public function changeAduserPassword($name, $password) {
-      $uri = 'http://10.2.8.130:3000/add-password?name='.$name.'&password='.$password;
+      $uri = 'http://10.2.8.130:3001/add-password';
+      $fields = array(
+        'name' => $name,
+        'password' => $password
+      );
       $curl = curl_init($uri);
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+      curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($fields));
       curl_exec($curl);
       $curlInfo = curl_getinfo($curl);
       if($curlInfo['http_code'] == '200') {

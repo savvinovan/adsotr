@@ -178,10 +178,11 @@ class Corp {
     
     
     /* Почта */
-    public function sendMailActivationLink() {
-      Yii::$app->mailer->compose('aduser/activation')
+    public function sendMailActivationLink($data) {
+      $activationLink = $this->getActivationLink($this->getStaffID($data));
+      Yii::$app->mailer->compose('aduser/activation', ['activationLink' => $activationLink])
       ->setFrom('aduser@s-vfu.ru')
-      ->setTo('ivanmat@mail.ru')
+      ->setTo($data['email'])
       ->setSubject('Активация вашего аккаунта')
       ->send();
     }
@@ -198,19 +199,27 @@ class Corp {
     
     public function createAdSotrPeopleID($data) {
       $staffID = $this->getStaffID($data);
+      $salt = 'ezbaitbydoro';
       $activationString = hash('sha256', time());
       $passwordHash = hash('sha256', $salt.$data['password']);
-      $sql = 'INSERT INTO AdSotrPeople (StaffID, CorpEmail, isActivated, ActivationString, Password) VALUES (:StaffID, :CorpEmail, 0, :ActivationString, :Password)';
+      $sql = 'INSERT INTO AdSotrPeople (StaffID, CorpEmail, isActivated, ActivationString, Password, Logonname) VALUES (:StaffID, :CorpEmail, 0, :ActivationString, :Password, :Logonname)';
       $command = $this->connection->createCommand($sql);
       $command->bindParam(":StaffID", $staffID);
       $command->bindParam(":CorpEmail", $data['email']);
+      $command->bindParam(":Logonname", $data['logonname']);
+      
       $command->bindParam(":Password", $passwordHash);
       $command->bindParam(":ActivationString", $activationString);
-      $command->execute();
-      // TODO: сделать проверку на успешный результат добавления
-      if(true) {
+      return $command->execute();
+    }
+    
+    public function registerAdSotr($data) {
+      if($this->createAdSotrPeopleID($data)) {
         $this->ldap->createDisabledUser($data);
+        $this->sendMailActivationLink($data);
       }
+      
+      
     }
     
     public function checkStep2($data) {
@@ -247,6 +256,43 @@ class Corp {
       $command->bindParam(":Patronymic", $data['Patronymic']);
       $row = $command->queryOne();
       return $row['StaffID'];
+    }
+    
+    public function test($name, $password) {
+      $this->ldap->changeAduserPassword($name, $password);
+    }
+    
+    public function saveStep1($data) {
+      $_SESSION['personalData']['Surname'] = $data['Surname'];
+      $_SESSION['personalData']['Name'] = $data['Name'];
+      $_SESSION['personalData']['Patronymic'] = $data['Patronymic'];
+      $_SESSION['personalData']['DocSerial'] = $data['DocSerial'];
+      $_SESSION['personalData']['BornDate'] = $data['BornDate'];
+      $_SESSION['personalData']['DocNo'] = $data['DocNo'];
+      $_SESSION['personalData']['fio'] = $data['fio'];
+      $_SESSION['personalData']['Initials'] = mb_strtoupper(mb_substr($data['Surname'],0,1).mb_substr($data['Name'],0,1).mb_substr($data['Patronymic'],0,1));
+    }
+    
+    public function saveStep2($data) {
+      $_SESSION['personalData']['password'] = $data['password'];
+      $_SESSION['personalData']['email'] = $data['email'];
+      $_SESSION['personalData']['logonname'] = $data['logonname'];
+    }
+    
+    private function getActivationLink($staffid) {
+      $sql = 'SELECT ActivationString FROM AdSotrPeople WHERE StaffID = :StaffID';
+      $command = $this->connection->createCommand($sql);
+      $command->bindParam(":StaffID", $staffid);
+      $row = $command->queryOne();
+      $activationLink = 'http://corp.s-vfu.ru/site/activateuser?link='.$row['ActivationString'];
+      return $activationLink;
+    }
+    
+    public function activateUser($data) {
+      $sql = 'UPDATE AdSotrPeople SET isActivated = 1 WHERE ActivationString = :ActivationString';
+      $command = $this->connection->createCommand($sql);
+      $command->bindParam(":ActivationString", $data['link']);
+      $command->execute();
     }
     
 }
