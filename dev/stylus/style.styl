@@ -1,0 +1,122 @@
+*
+    font-family 'PT Sans', sans-serif
+
+body
+    //background linear-gradient(to right bottom, #24C6DC,#514A9D)
+    background linear-gradient(133deg,#020002 0,#0c0622 21%,#2e3165 44%,#4a6db9 72%,#37c8ff 100%)
+
+
+.step1-bg__div
+    height 100vh
+    width 100%
+
+.center-text__div
+    display table
+    text-align center
+    width 100%
+
+.registration-title__h3
+    background none
+    color #333
+    font-weight 700
+
+.register-form__div, .login-choose-form
+    top 200px
+    padding 20px 10px
+    //-webkit-box-shadow 10px 10px 5px -8px rgba(0,0,0,0.43)
+    //-moz-box-shadow 10px 10px 5px -8px rgba(0,0,0,0.43)
+    box-shadow 5px 5px 50px 1px rgba(0,0,0,0.43)
+    background #fff
+    position absolute
+    width 500px
+    left 50%
+    margin-left -250px
+    border-radius 10px
+
+h3
+    background #337ab7
+    color #FFF
+    padding 16px 20px
+    margin 0 0 15px 0
+
+.info, .success, .warning, .error, .validation
+    border 1px solid
+    margin 10px 0px
+    padding 15px 10px 15px 50px
+    background-repeat no-repeat
+    background-position 10px center
+
+.info
+    color #00529B
+    background-color #BDE5F8
+    background-image url('../img/knob/Knob Info.png')
+
+.success
+    color #4F8A10
+    background-color #DFF2BF
+    background-image url('success.png')
+
+.warning
+    color #9F6000
+    background-color #FEEFB3
+    background-image url('warning.png')
+
+.error
+    color #D8000C
+    background-color #FFBABA
+    background-image url('../img/knob/Knob Cancel.png')
+
+input
+    &.logonname
+        visibility hidden
+        &:checked
+            & + img
+                & + span
+                    background #bbb
+
+input.logonname + img + span, input.logonname + img
+    cursor pointer
+
+.step1-submit__button
+    background linear-gradient(#4b6cb7, #182848)
+    text-transform uppercase
+    font-weight 700
+    color #fff
+    border none
+    font-size 1em
+    padding 10px 16px
+
+.step1-submit__button:hover
+    padding-top 12px
+    line-height 18px
+    color #fff
+    background linear-gradient( #182848,#4b6cb7)
+
+.error
+    background linear-gradient(#e65245,#e43a15)
+    border-radius 5px
+    border none
+    color #fff
+    display table
+    text-align center
+    width 100%
+    padding-left 10px
+    position absolute
+    left 0
+    font-size 1.2em
+    font-weight 700
+.copy
+    position fixed
+    bottom 20px
+    width 100%
+    text-align center
+    font-family 'PT Sans'
+    color #fff
+    opacity 0.5
+    font-size 1em
+.copy a, .copy a:visited, .copy a:link
+    color #fff
+    border-bottom 1px solid #fff
+.copy a:hover, .copy a:active
+    border-bottom none
+    text-decoration none

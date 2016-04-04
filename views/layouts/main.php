@@ -21,20 +21,25 @@ AppAsset::register($this);
     <?php $this->head() ?>
 </head>
 <body>
-<?php $this->beginBody() ?>
+  <?php $this->beginBody() ?>
 
-<div class="wrap">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-6 col-md-offset-3">
-        <?= $content ?>
+    <div class="wrap">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+            <?= $content ?>
+            </div>
+          </div>
         </div>
-      </div>
     </div>
+
+
+  <?php $this->endBody() ?>
+<div class="copy">
+<a href="http://www.s-vfu.ru/universitet/rukovodstvo-i-struktura/strukturnye-podrazdeleniya/ui/ois/">ОИС</a> УИ © 2016
 </div>
 
-
-<?php $this->endBody() ?>
 </body>
+
 </html>
 <?php $this->endPage() ?>
