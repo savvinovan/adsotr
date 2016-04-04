@@ -21,7 +21,7 @@ body
     font-weight 700
 
 .register-form__div, .login-choose-form
-    top 200px
+    top 100px
     padding 20px 10px
     //-webkit-box-shadow 10px 10px 5px -8px rgba(0,0,0,0.43)
     //-moz-box-shadow 10px 10px 5px -8px rgba(0,0,0,0.43)
@@ -93,8 +93,12 @@ input.logonname + img + span, input.logonname + img
     background linear-gradient( #182848,#4b6cb7)
 
 .error
-    background linear-gradient(#e65245,#e43a15)
-    border-radius 5px
+    //background linear-gradient(#e65245,#e43a15)
+    background-position left
+    background-color #e65245
+    background-image repeating-linear-gradient(45deg, transparent, transparent 10px, #e43a15 10px, #e43a15 20px)
+    border-bottom-right-radius 5px
+    border-bottom-left-radius 5px
     border none
     color #fff
     display table
@@ -105,6 +109,8 @@ input.logonname + img + span, input.logonname + img
     left 0
     font-size 1.2em
     font-weight 700
+    text-transform uppercase
+    text-shadow 1px 1px 1px #000
 .copy
     position fixed
     bottom 20px
@@ -120,3 +126,11 @@ input.logonname + img + span, input.logonname + img
 .copy a:hover, .copy a:active
     border-bottom none
     text-decoration none
+
+//
+//        STEP 2
+//
+.login-choose-popup__div
+    position absolute
+    color #000
+    opacity 0.5
