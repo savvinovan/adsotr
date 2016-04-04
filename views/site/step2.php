@@ -8,22 +8,28 @@ $this->title = 'Регистрация сотрудников в WiFi';
 ?>
 <div class="login-choose-form">
   <form class="form-horizontal" method="POST" action="<?=Url::toRoute('/site/step2')?>">
-  <h3>Шаг 2. Регистрация.</h3>
-   <div class="form-group">
+    <div class="center-text__div">
+      <h3 class="registration-title__h3">Шаг 2. Регистрация.</h3>
+    </div>
+    <div class="login-choose-popup__div">
+      Выберите логин
+    </div>
+
+    <div class="form-group">
       <label for="password" class="col-sm-4 control-label">Логин</label>
       <div class="col-sm-8">
           <?php foreach($logins as $row) { ?>
-            <label>
+            <label class="login-select__label">
                 <?php if($row['isAvailable']) { ?>
-                    <input type="radio" name="logonname" id="logonname-<?=$row['Name']?>" class='logonname' value="<?=$row['Name']?>"> 
-                    <?php echo Html::img('@web/img/knob/Knob Valid Green.png') ?> 
+                    <input type="radio" name="logonname" id="logonname-<?=$row['Name']?>" class='logonname' value="<?=$row['Name']?>">
+                    <?php echo Html::img('@web/img/knob/Knob Valid Green.png') ?>
                 <?php } else { ?>
-                <?php echo Html::img('@web/img/knob/Knob Cancel.png') ?> 
+                <?php echo Html::img('@web/img/knob/Knob Cancel.png') ?>
                 <?php } ?> <span><?=$row['Name']?></span>
             </label>
           <?php } ?>
       </div>
-   </div>
+</div>
    <div class="form-group">
       <label for="password" class="col-sm-4 control-label">Пароль</label>
       <div class="col-sm-8">
