@@ -40,7 +40,7 @@ class LDAP {
         'login' => $data['logonname'],
         'surname' => $data['Surname'],
         'givenname' => $data['Name'],
-        'initials' => $data['initials'],
+        'initials' => $data['Initials'],
         'group' => 'ФЭИ-М-СИМ-15',
         'institute' => 'Финансово-экономический институт',
         'upnlogin' => $data['logonname'].'@empl.s-vfu.ru',
