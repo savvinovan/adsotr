@@ -30,43 +30,51 @@ class SiteController extends Controller
     }
 
     public function actionStep1() {
-        $request = Yii::$app->request;
-        $corp = new Corp();
-        if(!empty($_SESSION['personalData'])) {
-          $data = $_SESSION['personalData'];
+      $request = Yii::$app->request;
+      $corp = new Corp();
+      $data = [];
+      if(!empty($_SESSION['personalData'])) {
+        $data['data'] = $_SESSION['personalData'];
+      }
+      if($request->isPost) {
+        unset($_SESSION['personalData']);
+        unset($_SESSION['isAllowedStep2']);
+        unset($_SESSION['isAllowedStep3']);
+        $modData = $corp->extractPersonalData($request->bodyParams);
+        $data['result'] = $corp->checkStep1($modData);
+        if($data['result']['error'] == '0') {
+          $corp->saveStep1($modData);
+          $_SESSION['isAllowedStep2'] = '1';
+          Controller::redirect(Url::toRoute('/site/step2'));
+        } else {
+          $data['data'] = $modData;
         }
-        if($request->isPost) {
-          $modData = $corp->extractPersonalData($request->bodyParams);
-          $checkResult = $corp->checkStep1($modData);
-          if($checkResult['error'] == '0') {
-            $corp->saveStep1($modData);
-            $_SESSION['isAllowedStep2'] = '1';
-            Controller::redirect(Url::toRoute('/site/step2'));
-          } else {
-            $data['result'] = $checkResult;
-            $data = $_REQUEST;
-          }
-        }
-        return $this->render('step1', $data);
+      }
+      return $this->render('step1', $data);
     }
 
     public function actionStep2() {
+      $request = Yii::$app->request;
       $corp = new Corp();
+      $data = [];
       if($_SESSION['isAllowedStep2'] == '1') {
-        $request = Yii::$app->request;
         $reqData = $request->bodyParams;
         $data['logins'] = $corp->getLogins($_SESSION['personalData']['fio']);
         if(!empty($_SESSION['personalData'])) {
-          $data = $_SESSION['personalData'];
+          $data['data'] = $_SESSION['personalData'];
         }
         if($request->isPost) {
+          unset($_SESSION['personalData']['password']);
+          unset($_SESSION['personalData']['passwordrepeat']);
+          unset($_SESSION['personalData']['email']);
+          unset($_SESSION['isAllowedStep3']);
           $data['result'] = $corp->checkStep2($reqData);
           if($data['result']['error'] == '0') {
             $corp->saveStep2($reqData);
             $_SESSION['isAllowedStep3'] = '1';
             Controller::redirect(Url::toRoute('/site/step3'));
           } else {
-            $data = $_REQUEST;
+            $data['data'] = $reqData;
           }
         }
         return $this->render('step2', $data);
