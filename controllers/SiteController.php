@@ -32,7 +32,9 @@ class SiteController extends Controller
     public function actionStep1() {
         $request = Yii::$app->request;
         $corp = new Corp();
-        $data = [];
+        if(!empty($_SESSION['personalData'])) {
+          $data = $_SESSION['personalData'];
+        }
         if($request->isPost) {
           $modData = $corp->extractPersonalData($request->bodyParams);
           $checkResult = $corp->checkStep1($modData);
@@ -42,8 +44,8 @@ class SiteController extends Controller
             Controller::redirect(Url::toRoute('/site/step2'));
           } else {
             $data['result'] = $checkResult;
+            $data = $_REQUEST;
           }
-          $data['preResponse'] = $_REQUEST;
         }
         return $this->render('step1', $data);
     }
@@ -54,13 +56,18 @@ class SiteController extends Controller
         $request = Yii::$app->request;
         $reqData = $request->bodyParams;
         $data['logins'] = $corp->getLogins($_SESSION['personalData']['fio']);
+        if(!empty($_SESSION['personalData'])) {
+          $data = $_SESSION['personalData'];
+        }
         if($request->isPost) {
           $data['result'] = $corp->checkStep2($reqData);
           if($data['result']['error'] == '0') {
             $corp->saveStep2($reqData);
             $_SESSION['isAllowedStep3'] = '1';
             Controller::redirect(Url::toRoute('/site/step3'));
-          } 
+          } else {
+            $data = $_REQUEST;
+          }
         }
         return $this->render('step2', $data);
       } else {
@@ -72,6 +79,7 @@ class SiteController extends Controller
         $corp = new Corp();
         if($_SESSION['isAllowedStep3'] == '1') {
           $data['result'] = $corp->registerAdSotr($_SESSION['personalData']);
+          print_r($_SESSION['personalData']);
           return $this->render('step3', $data);
         } else {
           Controller::redirect(Url::toRoute('/site/step1'));

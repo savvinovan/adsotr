@@ -165,7 +165,7 @@ class Corp {
     
     
     public function checkPersonalDataValidity($data) {
-      $sql = 'SELECT COUNT(*) as cnt FROM StaffPeople WHERE DocSerial = :DocSerial AND DocNo = :DocNo AND Surname = :Surname AND Name = :Name AND Patronymic = :Patronymic';
+      $sql = 'SELECT COUNT(*) AS cnt FROM StaffPeople WHERE DocSerial = :DocSerial AND DocNo = :DocNo AND Surname = :Surname AND Name = :Name AND Patronymic = :Patronymic';
       $command = $this->connection->createCommand($sql);
       $command->bindParam(":DocSerial", $data['DocSerial']);
       $command->bindParam(":DocNo", $data['DocNo']);
@@ -202,15 +202,28 @@ class Corp {
       $salt = 'ezbaitbydoro';
       $activationString = hash('sha256', time());
       $passwordHash = hash('sha256', $salt.$data['password']);
-      $sql = 'INSERT INTO AdSotrPeople (StaffID, CorpEmail, isActivated, ActivationString, Password, Logonname) VALUES (:StaffID, :CorpEmail, 0, :ActivationString, :Password, :Logonname)';
+      if(!$this->isAdSotrAlreadyCreated($staffID)) {
+        $sql = 'INSERT INTO AdSotrPeople (StaffID, CorpEmail, isActivated, ActivationString, Password, Logonname) VALUES (:StaffID, :CorpEmail, 0, :ActivationString, :Password, :Logonname)';
+        $command = $this->connection->createCommand($sql);
+        $command->bindParam(":StaffID", $staffID);
+        $command->bindParam(":CorpEmail", $data['email']);
+        $command->bindParam(":Logonname", $data['logonname']);
+
+        $command->bindParam(":Password", $passwordHash);
+        $command->bindParam(":ActivationString", $activationString);
+        $result = $command->execute();
+      } else {
+        $result = true;
+      }
+      return $result;
+    }
+    
+    private function isAdSotrAlreadyCreated($staffID) {
+      $sql = 'SELECT COUNT(*) AS cnt FROM AdSotrPeople WHERE StaffID = :StaffID';
       $command = $this->connection->createCommand($sql);
       $command->bindParam(":StaffID", $staffID);
-      $command->bindParam(":CorpEmail", $data['email']);
-      $command->bindParam(":Logonname", $data['logonname']);
-      
-      $command->bindParam(":Password", $passwordHash);
-      $command->bindParam(":ActivationString", $activationString);
-      return $command->execute();
+      $row = $command->queryOne();
+      return ($row['cnt'] == '1') ? true : false;
     }
     
     public function registerAdSotr($data) {
@@ -263,13 +276,13 @@ class Corp {
     }
     
     public function saveStep1($data) {
-      $_SESSION['personalData']['Surname'] = $data['Surname'];
-      $_SESSION['personalData']['Name'] = $data['Name'];
-      $_SESSION['personalData']['Patronymic'] = $data['Patronymic'];
+      $_SESSION['personalData']['Surname'] = $this->mb_ucfirst($data['Surname']);
+      $_SESSION['personalData']['Name'] = $this->mb_ucfirst($data['Name']);
+      $_SESSION['personalData']['Patronymic'] = $this->mb_ucfirst($data['Patronymic']);
       $_SESSION['personalData']['DocSerial'] = $data['DocSerial'];
       $_SESSION['personalData']['BornDate'] = $data['BornDate'];
       $_SESSION['personalData']['DocNo'] = $data['DocNo'];
-      $_SESSION['personalData']['fio'] = $data['fio'];
+      $_SESSION['personalData']['fio'] = $this->mb_ucfirst($data['Surname']).' '.$this->mb_ucfirst($data['Name']).' '.$this->mb_ucfirst($data['Patronymic']);
       $_SESSION['personalData']['Initials'] = mb_strtoupper(mb_substr($data['Surname'],0,1).mb_substr($data['Name'],0,1).mb_substr($data['Patronymic'],0,1));
     }
     
@@ -295,4 +308,10 @@ class Corp {
       $command->execute();
     }
     
+    function mb_ucfirst($string) {
+      $strlen = mb_strlen($string);
+      $firstChar = mb_substr($string, 0, 1);
+      $then = mb_substr($string, 1, $strlen - 1);
+      return mb_strtoupper($firstChar) . $then;
+    }
 }
