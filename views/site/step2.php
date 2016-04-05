@@ -6,17 +6,22 @@ use yii\helpers\Html;
 
 $this->title = 'Регистрация сотрудников в WiFi';
 ?>
+<div class="step2-popup-static__div" id="step2-popup" onclick="HidePopup()">
+  <div class="login-choose-popup__div" onclick="HidePopup()">
+    <div class="login-choose-popup-center__div">
+      <h2 class="login-choose-popup-title__h2">
+        ВЫБЕРИТЕ ЛОГИН
+      </h2>
+    </div>
+  </div>
+</div>
 <div class="login-choose-form">
   <form class="form-horizontal" method="POST" action="<?=Url::toRoute('/site/step2')?>">
     <div class="center-text__div">
       <h3 class="registration-title__h3">Шаг 2. Регистрация.</h3>
     </div>
-    <div class="login-choose-popup__div">
-      Выберите логин
-    </div>
-
     <div class="form-group">
-      <label for="password" class="col-sm-4 control-label">Логин</label>
+      <label for="password" class="col-sm-4 control-label" onclick="ShowPopup();">Логин</label>
       <div class="col-sm-8">
           <?php foreach($logins as $row) { ?>
             <label class="login-select__label">
@@ -59,3 +64,12 @@ $this->title = 'Регистрация сотрудников в WiFi';
     <div class="error"><?=$result['message']?></div>
   <?php } ?>
 </div>
+<script type="text/javascript">
+  function HidePopup(){
+    $( "#step2-popup" ).hide("slow");
+  };
+  function ShowPopup(){
+    $( "#step2-popup" ).show("slow");
+  };
+
+</script>

@@ -22,24 +22,21 @@ AppAsset::register($this);
 </head>
 <body>
   <?php $this->beginBody() ?>
-
-    <div class="wrap">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-md-6 col-md-offset-3">
-            <?= $content ?>
-            </div>
+  <div class="wrap">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-6 col-md-offset-3">
+          <?= $content ?>
           </div>
         </div>
-    </div>
-
-
+      </div>
+  </div>
   <?php $this->endBody() ?>
-<div class="copy">
-<a href="http://www.s-vfu.ru/universitet/rukovodstvo-i-struktura/strukturnye-podrazdeleniya/ui/ois/">ОИС</a> УИ © 2016
-</div>
+  <div class="copy">
+    <a href="http://www.s-vfu.ru/universitet/rukovodstvo-i-struktura/strukturnye-podrazdeleniya/ui/ois/">ОИС</a> УИ © 2016
+  </div>
+
 
 </body>
-
 </html>
 <?php $this->endPage() ?>

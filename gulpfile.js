@@ -12,6 +12,7 @@ gulp.task('browser-sync', function(){
     //gulp.watch("./app/stylus/*.styl", ['stylus']);
     gulp.watch("./dev/stylus/*.styl", ['stylus']);
     gulp.watch("./views/site/*.php", reload);
+    gulp.watch("./views/layouts/*.php", reload);
 })
 
 gulp.task('default', ['browser-sync'])
