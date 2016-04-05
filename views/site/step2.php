@@ -6,12 +6,30 @@ use yii\helpers\Html;
 
 $this->title = 'Регистрация сотрудников в WiFi';
 ?>
-<div class="step2-popup-static__div" id="step2-popup" onclick="HidePopup()">
+<div class="login-choose-popup-hide__div" id="step2-popup" onclick="HidePopup()">
   <div class="login-choose-popup__div" onclick="HidePopup()">
     <div class="login-choose-popup-center__div">
       <h2 class="login-choose-popup-title__h2">
         ВЫБЕРИТЕ ЛОГИН
       </h2>
+      <div class="login-choose-popup-list__div">
+        <?php foreach($logins as $row) { ?>
+          <?php $i++ ?>
+          <div class="col1-popup-list__div">
+            <?php if ($i<=4) { ?>
+              <?php if($row['isAvailable']) { ?>
+                <?php echo Html::img('@web/img/available-icon.png') ?>
+              <?php } else { ?>
+                <?php echo Html::img('@web/img/not-available-icon.png') ?>
+              <?php } ?>
+              <span><?=$row['Name']?>@empl.s-vfu.ru</span>
+            <?php } ?>
+          </div>
+
+
+
+        <?php } ?>
+      </div>
     </div>
   </div>
 </div>
@@ -21,20 +39,14 @@ $this->title = 'Регистрация сотрудников в WiFi';
       <h3 class="registration-title__h3">Шаг 2. Регистрация.</h3>
     </div>
     <div class="form-group">
-      <label for="password" class="col-sm-4 control-label" onclick="ShowPopup();">Логин</label>
+      <label for="" class="col-sm-4 control-label">Логин</label>
       <div class="col-sm-8">
-          <?php foreach($logins as $row) { ?>
-            <label class="login-select__label">
-                <?php if($row['isAvailable']) { ?>
-                    <input type="radio" name="logonname" id="logonname-<?=$row['Name']?>" class='logonname' value="<?=$row['Name']?>">
-                    <?php echo Html::img('@web/img/knob/Knob Valid Green.png') ?>
-                <?php } else { ?>
-                <?php echo Html::img('@web/img/knob/Knob Cancel.png') ?>
-                <?php } ?> <span><?=$row['Name']?></span>
-            </label>
-          <?php } ?>
+          <div class="login-select-button__div"  onclick="ShowPopup();">
+            matia@empl.s-vfu.ru <?php echo Html::img('@web/img/navigation-icon.png', ["class"=>"login-select-icon__img"]) ?>
+            <input type="hidden" name="login" value="yoyoyo">
+          </div>
       </div>
-</div>
+    </div>
    <div class="form-group">
       <label for="password" class="col-sm-4 control-label">Пароль</label>
       <div class="col-sm-8">
@@ -66,10 +78,10 @@ $this->title = 'Регистрация сотрудников в WiFi';
 </div>
 <script type="text/javascript">
   function HidePopup(){
-    $( "#step2-popup" ).hide("slow");
+    $( "#step2-popup" ).attr("class", "login-choose-popup-hide__div");
   };
   function ShowPopup(){
-    $( "#step2-popup" ).show("slow");
+    $( "#step2-popup" ).attr("class", "login-choose-popup__div");
   };
 
 </script>
