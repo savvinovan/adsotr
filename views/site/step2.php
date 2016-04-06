@@ -13,22 +13,37 @@ $this->title = 'Регистрация сотрудников в WiFi';
         ВЫБЕРИТЕ ЛОГИН
       </h2>
       <div class="login-choose-popup-list__div">
-        <?php foreach($logins as $row) { ?>
-          <?php $i++ ?>
-          <div class="col1-popup-list__div">
-            <?php if ($i<=4) { ?>
-              <?php if($row['isAvailable']) { ?>
-                <?php echo Html::img('@web/img/available-icon.png') ?>
-              <?php } else { ?>
-                <?php echo Html::img('@web/img/not-available-icon.png') ?>
+        <div class="col1-popup-list__div">
+          <?php foreach($logins as $row) { ?>
+            <?php $i++ ?>
+              <?php if ($i<=7) { ?>
+                <div class="login-choose-list-element__div" onclick="SelectThis('<?php echo $row["Name"] ?>');">
+                <?php if($row['isAvailable']) { ?>
+                  <?php echo Html::img('@web/img/available-icon.png') ?>
+                <?php } else { ?>
+                  <?php echo Html::img('@web/img/not-available-icon.png') ?>
+                <?php } ?>
+                <span><?=$row['Name']?>@empl.s-vfu.ru</span>
+                </div>
               <?php } ?>
-              <span><?=$row['Name']?>@empl.s-vfu.ru</span>
             <?php } ?>
-          </div>
-
-
-
-        <?php } ?>
+        </div>
+        <div class="col2-popup-list__div">
+          <?php $i = 0; ?>
+          <?php foreach($logins as $row) { ?>
+            <?php $i++ ?>
+              <?php if(($i > 7)AND($i<=14)) { ?>
+                <div class="login-choose-list-element__div" onclick="SelectThis('<?php echo $row["Name"] ?>');">
+                <?php if($row['isAvailable']) { ?>
+                  <?php echo Html::img('@web/img/available-icon.png') ?>
+                <?php } else { ?>
+                  <?php echo Html::img('@web/img/not-available-icon.png') ?>
+                <?php } ?>
+                <span><?=$row['Name']?>@empl.s-vfu.ru</span>
+                </div>
+              <?php } ?>
+            <?php } ?>
+        </div>
       </div>
     </div>
   </div>
@@ -42,8 +57,8 @@ $this->title = 'Регистрация сотрудников в WiFi';
       <label for="" class="col-sm-4 control-label">Логин</label>
       <div class="col-sm-8">
           <div class="login-select-button__div"  onclick="ShowPopup();">
-            matia@empl.s-vfu.ru <?php echo Html::img('@web/img/navigation-icon.png', ["class"=>"login-select-icon__img"]) ?>
-            <input type="hidden" name="login" value="yoyoyo">
+            <span>Выберите логин</span> <?php echo Html::img('@web/img/navigation-icon.png', ["class"=>"login-select-icon__img"]) ?>
+            <input type="hidden" name="logonname" id="hidden_login_input" value="">
           </div>
       </div>
     </div>
@@ -83,5 +98,8 @@ $this->title = 'Регистрация сотрудников в WiFi';
   function ShowPopup(){
     $( "#step2-popup" ).attr("class", "login-choose-popup__div");
   };
-
+  function SelectThis(name) {
+    $(".login-select-button__div span").text(name + "@empl.s-vfu.ru");
+    $("#hidden_login_input").val(name);
+  }
 </script>
