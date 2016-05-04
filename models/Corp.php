@@ -165,8 +165,10 @@ class Corp {
     
     
     public function checkPersonalDataValidity($data) {
-      $sql = 'SELECT COUNT(*) AS cnt FROM StaffPeople WHERE DocSerial = :DocSerial AND DocNo = :DocNo AND Surname = :Surname AND Name = :Name AND Patronymic = :Patronymic';
+      $bornDate = date('Y-m-d',strtotime($data['BornDate']));
+      $sql = 'SELECT COUNT(*) AS cnt FROM StaffPeople WHERE BornDate = :BornDate AND DocSerial = :DocSerial AND DocNo = :DocNo AND Surname = :Surname AND Name = :Name AND Patronymic = :Patronymic';
       $command = $this->connection->createCommand($sql);
+      $command->bindParam(":BornDate", $bornDate);
       $command->bindParam(":DocSerial", $data['DocSerial']);
       $command->bindParam(":DocNo", $data['DocNo']);
       $command->bindParam(":Surname", $data['Surname']);
@@ -192,6 +194,14 @@ class Corp {
       ->setFrom('aduser@s-vfu.ru')
       ->setTo('ivanmat@mail.ru')
       ->setSubject('Активация вашего аккаунта')
+      ->send();
+    }
+    
+    public function sendMailAccountActivated($login, $email) {
+      Yii::$app->mailer->compose('aduser/activated', ['login' => $login])
+      ->setFrom('aduser@s-vfu.ru')
+      ->setTo($email)
+      ->setSubject('Ваша учетная запись активирована')
       ->send();
     }
     
@@ -243,6 +253,9 @@ class Corp {
       } else if(empty($data['password'])) {
         $result['error'] = '1';
         $result['message'] = 'Вы не ввели пароль';
+      } else if(mb_strlen($data['password']) < 8) {
+        $result['error'] = '1';
+        $result['message'] = 'Пароль должен быть от 8 символов';
       } else if(empty($data['passwordrepeat'])) {
         $result['error'] = '1';
         $result['message'] = 'Вы не ввели повтор пароля';
@@ -301,12 +314,63 @@ class Corp {
       return $activationLink;
     }
     
-    public function activateUser($data) {
+    /* Активация пользователя */
+    
+    public function activateAdSotr($link) {
+      $login = $this->getLoginByLink($link);
+      $email = $this->getEmailByLink($link);
+      if($this->activateUser($link)) {
+        $this->activateLdapUser($login);
+        $this->sendMailAccountActivated($login, $email);
+      }
+    }
+    
+    private function activateUser($link) {
       $sql = 'UPDATE AdSotrPeople SET isActivated = 1 WHERE ActivationString = :ActivationString';
       $command = $this->connection->createCommand($sql);
-      $command->bindParam(":ActivationString", $data['link']);
-      $command->execute();
+      $command->bindParam(":ActivationString", $link);
+      return $command->execute();
     }
+    
+    private function activateLdapUser($name) {
+      $uri = 'http://10.2.8.130:3001/add-activate';
+      $curl = curl_init($uri);      
+      $fields = array(
+        'name' => $name,
+      );
+      
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+      curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($fields));
+
+      curl_exec($curl);
+      $curlInfo = curl_getinfo($curl);
+      curl_close($curl);
+      if($curlInfo['http_code'] == '200') {
+        $result['error'] = '0';
+        $result['message'] = 'Создан неактивный пользователь';
+      } else {
+        $result['error'] = '1';
+        $result['message'] = 'Произошла ошибка';
+      }      
+    }
+    
+    private function getLoginByLink($link) {
+      $sql = 'SELECT Logonname FROM AdSotrPeople WHERE ActivationString = :ActivationString';
+      $command = $this->connection->createCommand($sql);
+      $command->bindParam(":ActivationString", $link);
+      $row = $command->queryOne();
+      return $row['Logonname'];
+    }
+    
+    private function getEmailByLink($link) {
+      $sql = 'SELECT CorpEmail FROM AdSotrPeople WHERE ActivationString = :ActivationString';
+      $command = $this->connection->createCommand($sql);
+      $command->bindParam(":ActivationString", $link);
+      $row = $command->queryOne();
+      return $row['CorpEmail'];
+    }
+    
+    /* END Активация пользователя */
     
     function mb_ucfirst($string) {
       $strlen = mb_strlen($string);
@@ -314,4 +378,55 @@ class Corp {
       $then = mb_substr($string, 1, $strlen - 1);
       return mb_strtoupper($firstChar) . $then;
     }
+    
+    /* Создание структуры каталогов */
+    
+    public function createAdUnits() {
+      $departments = $this->getDepartments();
+      foreach($departments as $row) {
+        echo $this->getDepartmentADLink($row).'<br />';
+      }
+    }
+    
+    private function getDepartments() {
+      $sql = "SELECT * FROM Departments";
+      $command = $this->connection->createCommand($sql);
+      $rows = $command->queryAll();
+      return $rows;
+    }
+    
+    private function getDepartmentADLink($department) {
+      $link = '';
+      $structure[] = 'OU='.$department['Name'];
+      $isFound = true;
+      $parentDeptID = $department['ParentDeptID'];
+      while($isFound) {
+        $departmentParent = $this->getDepartmentParent($parentDeptID);
+        if($departmentParent['cnt'] != '1') {
+          $isFound = false;
+        } else {
+          $structure[] = 'OU='.$departmentParent['Name'];
+          $parentDeptID = $departmentParent['ParentDeptID'];
+        }
+      }
+      $structure[] = 'OU=Сотрудники';
+      $structure[] = 'OU=СВФУ';
+      $structure[] = 'DC=svfu';
+      $structure[] = 'DC=s-vfu';
+      $structure[] = 'DC=ru';
+      foreach($structure as $row) {
+        $link .= $row.',';
+      }
+      $link = mb_substr($link, 0, -1);
+      return $link;
+    }
+    
+    private function getDepartmentParent($parentDeptID) {
+      $sql = 'SELECT COUNT(*) AS cnt, DeptID, ParentDeptID, Name FROM Departments WHERE DeptID = :DepartmentParent GROUP BY DeptID, Name, ParentDeptID';
+      $command = $this->connection->createCommand($sql);
+      $command->bindParam(":DepartmentParent", $parentDeptID);
+      $row = $command->queryOne();
+      return $row;
+    }
+    
 }
