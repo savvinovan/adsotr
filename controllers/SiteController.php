@@ -87,7 +87,6 @@ class SiteController extends Controller
         $corp = new Corp();
         if($_SESSION['isAllowedStep3'] == '1') {
           $data['result'] = $corp->registerAdSotr($_SESSION['personalData']);
-          print_r($_SESSION['personalData']);
           return $this->render('step3', $data);
         } else {
           Controller::redirect(Url::toRoute('/site/step1'));
@@ -105,7 +104,12 @@ class SiteController extends Controller
     
     public function actionActivateuser() {
       $corp = new Corp();
-      $corp->activateUser($_REQUEST);
+      $corp->activateAdSotr($_REQUEST['link']);
+    }
+    
+    public function actionCreateadunits() {
+      $corp = new Corp();
+      $corp->createAdUnits();
     }
     
 }
